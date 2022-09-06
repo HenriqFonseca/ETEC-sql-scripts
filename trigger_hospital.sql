@@ -1,8 +1,8 @@
--- Database: hospital
+-- Database: trigger_hospital
 
--- DROP DATABASE IF EXISTS hospital;
+-- DROP DATABASE IF EXISTS trigger_hospital;
 
-CREATE DATABASE hospital
+CREATE DATABASE trigger_hospital
     WITH
     OWNER = postgres
     ENCODING = 'UTF8'
@@ -16,7 +16,6 @@ CREATE DATABASE hospital
     id_pacientes int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,	
     nomePaciente varchar(40) not null,
     sexo varchar (1),
-	/*tive que utilizar o BIT pois n„o h· boolean type no sqlserver. 1 = true, 0 = false */
     obito BIT
 	);
 
@@ -57,10 +56,10 @@ insert into pacientes (nomePaciente, sexo)
 values ('henrique','m'), ('fernando','m'), ('nibi','m');
 
 insert into profissionais(nomeProfissionais)
-values ('Bruna'), ('Kau„'), ('Rafael');
+values ('Bruna'), ('Kau√£'), ('Rafael');
 
 insert into especialidades (especialidade)
-values ('ClÌnica geral'), ('Urologista'), ('Cardiologista');
+values ('Cl√≠nica geral'), ('Urologista'), ('Cardiologista');
 
 insert into consultas (id_especialidades, id_pacientes, id_profissionais)
 values (2,1,1), (2,2,2), (2,3,3);
@@ -72,26 +71,17 @@ select * from profissionais;
 select * from especialidades;
 select * from consultas;
 
-select c.id_consultas, pac.nomePaciente, p.nomeProfissionais, e.especialidade, c.insertDate
-	from consultas as c
-	inner join pacientes as pac on pac.id_pacientes = c.id_pacientes
-	inner join especialidades as e on e.id_especialidades = c.id_especialidades
-	inner join profissionais as p on p.id_profissionais = c.id_profissionais
-
-create OR REPLACE function trgValidaDadosConsulta()
-RETURNS trigger AS trgValidaDadosConsulta
-
-DECLARE
-pac_row record;
-espec_row record;
-
+CREATE TRIGGER ValidaDadosConsulta
+	AFTER INSERT OR UPDATE ON consultas
+	FOR EACH ROW
+	EXECUTE PROCEDURE ValidaDadosConsulta();
+	
+CREATE OR REPLACE FUNCTION ValidaDadosConsulta()
+RETURNS TRIGGER AS $$
 BEGIN
 	raise notice 'o trigger rodou!!';
+	raise notice 'CONSEGUI FAZER 10 MINUTOS ANTES DA ATIVIDADE FECHARüôè';
 	RETURN NEW;
 END
-$trgValidaDadosConsulta$ LANGUAGE plpgsql;
-
-create TRIGGER validaDadosConsulta
-before insert or UPDATE on consultas
-FOR each ROW
-EXECUTE PROCEDURE trgValidaDadosConsulta();
+$$ LANGUAGE plpgsql;
+	
