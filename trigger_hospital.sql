@@ -78,7 +78,7 @@ CREATE TRIGGER ValidaDadosConsulta
 	
 CREATE OR REPLACE FUNCTION ValidaDadosConsulta()
 RETURNS TRIGGER AS $$
-BEGIN
+BEGIN /*O que o trigger irá fazer*/
 	raise notice 'o trigger rodou!!';
 	raise notice 'CONSEGUI FAZER 10 MINUTOS ANTES DA ATIVIDADE FECHAR🙏';
 	RETURN NEW;
