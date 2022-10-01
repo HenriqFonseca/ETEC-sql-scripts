@@ -1,21 +1,8 @@
--- Database: trigger_hospital
-
--- DROP DATABASE IF EXISTS trigger_hospital;
-
-CREATE DATABASE trigger_hospital
-    WITH
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    LC_COLLATE = 'Portuguese_Brazil.1252'
-    LC_CTYPE = 'Portuguese_Brazil.1252'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1
-    IS_TEMPLATE = False;
-	
 	create table pacientes(
     id_pacientes int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,	
     nomePaciente varchar(40) not null,
     sexo varchar (1),
+	/*tive que utilizar o BIT pois não há boolean type no sqlserver. 1 = true, 0 = false */
     obito BIT
 	);
 
@@ -71,21 +58,28 @@ select * from profissionais;
 select * from especialidades;
 select * from consultas;
 
-CREATE TRIGGER ValidaDadosConsulta
-	AFTER INSERT OR UPDATE ON consultas
-	FOR EACH ROW
-	EXECUTE PROCEDURE ValidaDadosConsulta();
-	
-CREATE OR REPLACE FUNCTION ValidaDadosConsulta()
-RETURNS TRIGGER AS $$
-<<<<<<< HEAD
-BEGIN /*O que o trigger irá fazer*/
-=======
+select c.id_consultas, pac.nomePaciente, p.nomeProfissionais, e.especialidade, c.insertDate
+	from consultas as c
+	inner join pacientes as pac on pac.id_pacientes = c.id_pacientes
+	inner join especialidades as e on e.id_especialidades = c.id_especialidades
+	inner join profissionais as p on p.id_profissionais = c.id_profissionais
+
+create OR REPLACE function trgValidaDadosConsulta()
+RETURNS trigger AS trgValidaDadosConsulta
+
+DECLARE
+pac_row record;
+espec_row record;
+
 BEGIN
->>>>>>> dae44944c37c80c9a37bd9734564538d67d81a92
 	raise notice 'o trigger rodou!!';
-	raise notice 'CONSEGUI FAZER 10 MINUTOS ANTES DA ATIVIDADE FECHAR🙏';
 	RETURN NEW;
 END
-$$ LANGUAGE plpgsql;
-	
+$trgValidaDadosConsulta$ LANGUAGE plpgsql;
+
+create TRIGGER validaDadosConsulta
+before insert or UPDATE on consultas
+FOR each ROW
+EXECUTE PROCEDURE trgValidaDadosConsulta();
+
+psql -U postgres -d trigger_hospital -a -f trigger.sql
